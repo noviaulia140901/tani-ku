@@ -1,6 +1,6 @@
 FROM php:8.4-apache
 
-# Install dependencies yang dibutuhkan Laravel
+# Install system dependencies & Node.js (untuk build Vite)
 RUN apt-get update && apt-get install -y \
     libpng-dev \
     libjpeg62-turbo-dev \
@@ -10,7 +10,9 @@ RUN apt-get update && apt-get install -y \
     git \
     curl \
     libonig-dev \
-    libxml2-dev
+    libxml2-dev \
+    nodejs \
+    npm
 
 # Install PHP extensions
 RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
@@ -24,8 +26,11 @@ WORKDIR /var/www/html
 # Copy seluruh file project ke container
 COPY . /var/www/html
 
-# Jalankan Composer Install agar folder vendor dan autoload.php tergenerate otomatis di server
+# Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader
+
+# Install Node dependencies dan build aset frontend (Vite)
+RUN npm install && npm run build
 
 # Berikan izin akses folder storage dan bootstrap cache
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache \
