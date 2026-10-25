@@ -1,6 +1,6 @@
 FROM php:8.2-apache
 
-# Install dependencies yang dibutuhkan Laravel
+# Install dependencies sistem yang dibutuhkan Laravel & Composer
 RUN apt-get update && apt-get install -y \
     libpng-dev \
     libjpeg62-turbo-dev \
@@ -13,13 +13,15 @@ RUN apt-get update && apt-get install -y \
     git \
     curl \
     libonig-dev \
-    libxml2-dev
+    libxml2-dev \
+    libzip-dev \
+    libicu-dev
 
 # Clear cache
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Install PHP extensions
-RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
+# Install ekstensi PHP yang wajib untuk Laravel
+RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip intl
 
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
@@ -30,7 +32,7 @@ WORKDIR /var/www/html
 # Copy semua file project ke container
 COPY . /var/www/html
 
-# Jalankan composer install dengan opsi aman
+# Jalankan composer install
 RUN composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
 
 # Ubah document root Apache ke folder public Laravel
