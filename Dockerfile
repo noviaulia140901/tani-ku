@@ -30,6 +30,9 @@ WORKDIR /var/www/html
 # Copy semua file project ke container
 COPY . /var/www/html
 
+# Jalankan composer install agar folder vendor dan autoload.php ter-generate
+RUN composer install --no-dev --optimize-autoloader
+
 # Ubah document root Apache ke folder public Laravel
 ENV APACHE_DOCUMENT_ROOT /var/www/html/public
 RUN sed -ri -s 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
